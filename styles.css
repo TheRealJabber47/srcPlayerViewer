@@ -23,7 +23,7 @@ body.dark-mode {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   width: 90%;
-  max-width: 1000px; /* Larger container */
+  max-width: 1000px;
   text-align: center;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -81,7 +81,7 @@ body.dark-mode h1 {
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
-  flex-wrap: wrap; /* Allow dropdowns to wrap on smaller screens */
+  flex-wrap: wrap;
 }
 
 .dropdowns select {

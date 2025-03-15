@@ -60,6 +60,7 @@ document.getElementById('runTypeSelect').addEventListener('change', async functi
 
     // Clear the third and fourth dropdowns when the second dropdown is updated
     document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
     document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
 });
 
@@ -69,6 +70,7 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     const levelOrCategoryId = this.value;
     if (!runType || !levelOrCategoryId) {
         document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
         document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
         return;
     }
@@ -83,6 +85,15 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     }
 
     const response = await fetch(url);
+    if (!response.ok) {
+        // Handle 404 or other errors
+        console.error('Error fetching data:', response.statusText);
+        document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        document.getElementById('variableSelect').innerHTML = '<option value="">No variables available</option>';
+        document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+        return;
+    }
+
     const data = await response.json();
     const categoryOrSubcategorySelect = document.getElementById('categoryOrSubcategorySelect');
     categoryOrSubcategorySelect.innerHTML = '<option value="">Select a category or subcategory</option>';
@@ -96,6 +107,7 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     });
 
     // Clear the fourth dropdown when the third dropdown is updated
+    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
     document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
 });
 
@@ -110,17 +122,30 @@ document.getElementById('categoryOrSubcategorySelect').addEventListener('change'
 
     const url = `https://www.speedrun.com/api/v1/categories/${categoryOrSubcategoryId}/variables`;
     const response = await fetch(url);
+
+    if (!response.ok) {
+        // Handle 404 or other errors
+        console.error('Error fetching variables:', response.statusText);
+        document.getElementById('variableSelect').innerHTML = '<option value="">No variables available</option>';
+        document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+        return;
+    }
+
     const data = await response.json();
     const variableSelect = document.getElementById('variableSelect');
     variableSelect.innerHTML = '<option value="">Select a variable</option>';
 
     // Populate the fourth dropdown with variables
-    data.data.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.textContent = item.name;
-        variableSelect.appendChild(option);
-    });
+    if (data.data && data.data.length > 0) {
+        data.data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.name;
+            variableSelect.appendChild(option);
+        });
+    } else {
+        document.getElementById('variableSelect').innerHTML = '<option value="">No variables available</option>';
+    }
 
     // Clear the fifth dropdown when the fourth dropdown is updated
     document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
@@ -136,17 +161,29 @@ document.getElementById('variableSelect').addEventListener('change', async funct
 
     const url = `https://www.speedrun.com/api/v1/variables/${variableId}`;
     const response = await fetch(url);
+
+    if (!response.ok) {
+        // Handle 404 or other errors
+        console.error('Error fetching variable values:', response.statusText);
+        document.getElementById('variableValueSelect').innerHTML = '<option value="">No variable values available</option>';
+        return;
+    }
+
     const data = await response.json();
     const variableValueSelect = document.getElementById('variableValueSelect');
     variableValueSelect.innerHTML = '<option value="">Select a variable value</option>';
 
     // Populate the fifth dropdown with variable values
-    Object.entries(data.data.values.values).forEach(([key, value]) => {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = value;
-        variableValueSelect.appendChild(option);
-    });
+    if (data.data.values && data.data.values.values) {
+        Object.entries(data.data.values.values).forEach(([key, value]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = value.label || value; // Use the label if available, otherwise the value
+            variableValueSelect.appendChild(option);
+        });
+    } else {
+        document.getElementById('variableValueSelect').innerHTML = '<option value="">No variable values available</option>';
+    }
 });
 
 // Fetch and display the leaderboard when the "Search" button is clicked
@@ -166,10 +203,10 @@ async function fetchLeaderboard() {
         // Fetch full game leaderboard
         url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&embed=players`;
         if (categoryOrSubcategoryId) {
-            url += `&var-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
+            url += `&-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
         }
         if (variableId && variableValueId) {
-            url += `&var-${variableId}=${variableValueId}`; // Add variable value filter
+            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
         }
     } else if (runType === 'level') {
         // Fetch level leaderboard
@@ -179,7 +216,7 @@ async function fetchLeaderboard() {
         }
         url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/level/${levelOrCategoryId}/category/${categoryOrSubcategoryId}?top=100&embed=players`;
         if (variableId && variableValueId) {
-            url += `&var-${variableId}=${variableValueId}`; // Add variable value filter
+            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
         }
     }
 
