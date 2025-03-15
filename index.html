@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedrun Leaderboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Speedrun Leaderboard</h1>
+        <div class="search-bar">
+            <input type="text" id="gameInput" placeholder="Enter game abbreviation (e.g., sm64)">
+            <button onclick="fetchLeaderboard()">Search</button>
+        </div>
+        <div class="dropdowns">
+            <select id="runTypeSelect">
+                <option value="">Select run type</option>
+                <option value="full-game">Full Game</option>
+                <option value="level">Level</option>
+            </select>
+            <select id="levelOrCategorySelect">
+                <option value="">Select a level or category</option>
+            </select>
+            <select id="categoryOrSubcategorySelect">
+                <option value="">Select a category or subcategory</option>
+            </select>
+        </div>
+        <div id="leaderboard"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
