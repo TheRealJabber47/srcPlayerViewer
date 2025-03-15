@@ -9,6 +9,7 @@
 <body>
     <div class="container">
         <h1>Speedrun Leaderboard</h1>
+        <button id="darkModeToggle">Toggle Dark Mode</button>
         <div class="search-bar">
             <input type="text" id="gameInput" placeholder="Enter game abbreviation (e.g., sm64)">
             <button onclick="fetchLeaderboard()">Search</button>
@@ -24,6 +25,12 @@
             </select>
             <select id="categoryOrSubcategorySelect">
                 <option value="">Select a category or subcategory</option>
+            </select>
+            <select id="variableSelect">
+                <option value="">Select a variable</option>
+            </select>
+            <select id="variableValueSelect">
+                <option value="">Select a variable value</option>
             </select>
         </div>
         <div id="leaderboard"></div>

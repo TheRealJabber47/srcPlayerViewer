@@ -9,6 +9,12 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #f4f4f9;
 }
 
 .container {
@@ -17,14 +23,24 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   width: 90%;
-  max-width: 800px;
+  max-width: 1000px; /* Larger container */
   text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .container {
+  background-color: #2c3e50;
+  color: #f4f4f9;
 }
 
 h1 {
   font-size: 2.5rem;
   margin-bottom: 20px;
   color: #2c3e50;
+}
+
+body.dark-mode h1 {
+  color: #f4f4f9;
 }
 
 /* Search Bar */
@@ -65,6 +81,7 @@ h1 {
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap; /* Allow dropdowns to wrap on smaller screens */
 }
 
 .dropdowns select {
@@ -75,6 +92,12 @@ h1 {
   background-color: white;
   cursor: pointer;
   width: 200px;
+}
+
+body.dark-mode .dropdowns select {
+  background-color: #34495e;
+  color: #f4f4f9;
+  border-color: #555;
 }
 
 /* Leaderboard */
@@ -94,6 +117,11 @@ h1 {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+body.dark-mode #leaderboard div {
+  background-color: #34495e;
+  color: #f4f4f9;
+}
+
 #leaderboard div:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -102,6 +130,27 @@ h1 {
 #leaderboard div span {
   font-size: 1rem;
   color: #555;
+}
+
+body.dark-mode #leaderboard div span {
+  color: #f4f4f9;
+}
+
+/* Dark Mode Toggle */
+#darkModeToggle {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+#darkModeToggle:hover {
+  background-color: #2980b9;
 }
 
 /* Responsive Design */
