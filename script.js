@@ -60,8 +60,8 @@ document.getElementById('runTypeSelect').addEventListener('change', async functi
 
     // Clear the third and fourth dropdowns when the second dropdown is updated
     document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
-    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
-    document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+    document.getElementById('variableValues').innerHTML = '<option value="">Select a variable</option>';
+    // document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
 });
 
 // Fetch categories or subcategories based on the selected level or category
@@ -71,6 +71,7 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     if (!runType || !levelOrCategoryId) {
         document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
         document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
+
         return;
     }
     document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
@@ -138,6 +139,9 @@ document.getElementById('categoryOrSubcategorySelect').addEventListener('change'
         });
             
     };
+
+
+
 });
 
 // Fetch and display the leaderboard when the "Search" button is clicked
@@ -155,16 +159,16 @@ async function fetchLeaderboard() {
     if (runType === 'full-game') {
         // Fetch full game leaderboard
         if (variableValue) {
-        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&var-${categoryOrSubcategoryId}=${variableValue}`;
+        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&var-${categoryOrSubcategoryId}=${variableValue}&embed=players`;
         console.log(url)
         } else 
-            url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100`
-        if (categoryOrSubcategoryId) {
-            url += `&-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
-        }
-        if (variableId && variableValueId) {
-            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
-        }
+            url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&embed=players`
+        // if (categoryOrSubcategoryId) {
+        //     url += `&-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
+        // }
+        // if (variableId && variableValueId) {
+        //     url += `&-${variableId}=${variableValueId}`; // Add variable value filter
+        // }
     } else if (runType === 'level') {
         // Fetch level leaderboard
         if (!categoryOrSubcategoryId) {
@@ -180,7 +184,7 @@ async function fetchLeaderboard() {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        displayLeaderboard(data.data.runs, runType);
+        displayLeaderboard(data.data, runType);
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
         alert('Failed to fetch leaderboard. Please check your selections and try again.');
@@ -198,16 +202,24 @@ function formatTime(isoDuration) {
 }
 
 // Display the leaderboard
-function displayLeaderboard(runs, runType) {
+function displayLeaderboard(data, runType) {
+    const runs = data.runs
     const leaderboard = document.getElementById('leaderboard');
     leaderboard.innerHTML = '';
     runs.forEach((run, index) => {
         const runDiv = document.createElement('div');
+        let name;
+        try {
+            name = data.players.data[index].names.international;
+        } catch (error) { 
+            name = data.players.data[index].name;
+        }
         runDiv.innerHTML = `
             <span>Position: ${index + 1}</span>
-            <span>User: ${run.run.players[0].name}</span>
+            <span>User: ${name}</span>
             <span>Time: ${formatTime(run.run.times.primary)}</span>
             <span>Type: ${runType === 'full-game' ? 'Full Game' : 'Level'}</span>
+            <a href=${run.run.weblink} target="_blank"> <button class="hotlink"> 🏆 </button> </a>
         `;
         leaderboard.appendChild(runDiv);
     });
@@ -222,8 +234,7 @@ function clearDropdowns() {
     `;
     document.getElementById('levelOrCategorySelect').innerHTML = '<option value="">Select a level or category</option>';
     document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
-    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
-    document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+    document.getElementById('variableValues').innerHTML = '<option value="">Select a variable</option>';
 }
 
 // Dark mode toggle
