@@ -50,7 +50,7 @@ document.getElementById('runTypeSelect').addEventListener('change', async functi
     const data = await response.json();
     const levelOrCategorySelect = document.getElementById('levelOrCategorySelect');
     levelOrCategorySelect.innerHTML = '<option value="">Select a level or category</option>';
-
+    document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
     // Populate the second dropdown with levels or categories
     data.data.forEach(item => {
         if (runType === 'full-game') {
@@ -80,9 +80,10 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     const levelOrCategoryId = this.value;
     if (!runType || !levelOrCategoryId) {
         document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
         return;
     }
-
+    document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
     let url;
     if (runType === 'full-game') {
         // Fetch subcategories for the selected category
@@ -91,12 +92,12 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
         // Fetch categories for the selected level
         url = `https://www.speedrun.com/api/v1/levels/${levelOrCategoryId}/categories`;
     }
-
+    
     const response = await fetch(url);
     const data = await response.json();
     const categoryOrSubcategorySelect = document.getElementById('categoryOrSubcategorySelect');
     categoryOrSubcategorySelect.innerHTML = '<option value="">Select a category or subcategory</option>';
-
+    
     // Populate the third dropdown with categories or subcategories
     data.data.forEach(item => {
         const option = document.createElement('option');
@@ -104,6 +105,42 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
         option.textContent = item.name;
         categoryOrSubcategorySelect.appendChild(option);
     });
+    //clear variable list if it is updated
+    // document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'    
+});
+
+document.getElementById('categoryOrSubcategorySelect').addEventListener('change', async function () {
+    //when variable not selected, clear?
+    const categoryOrSubcategoryId = document.getElementById('categoryOrSubcategorySelect').value;
+    const levelOrCategoryId = document.getElementById('levelOrCategorySelect').value;
+    const runType = document.getElementById('runTypeSelect').value;
+    const variableValues = document.getElementById('variableValues');
+    if (!levelOrCategoryId || !runType || !categoryOrSubcategoryId) {
+        document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
+        return;
+    } 
+    // document.getElementById('variableValues').innerHTML = '<option value="">Select variable value</option>'
+
+    let url;
+    if (runType === 'full-game') {
+        url = `https://www.speedrun.com/api/v1/categories/${levelOrCategoryId}/variables`
+        const response = await fetch(url);
+        const data = await response.json();
+        data.data.forEach(item => {
+            if (item.id === categoryOrSubcategoryId) {
+                for (const [key, value] of Object.entries(item.values.values)) {
+                    const option = document.createElement('option');
+                    console.log(value.label, key)
+                    option.value = key;
+                    option.textContent = value.label;
+                    variableValues.appendChild(option);
+                };
+            }
+        });
+            
+    };
+
+
 });
 
 // Fetch and display the leaderboard when the "Search" button is clicked
@@ -111,6 +148,7 @@ async function fetchLeaderboard() {
     const runType = document.getElementById('runTypeSelect').value;
     const levelOrCategoryId = document.getElementById('levelOrCategorySelect').value;
     const categoryOrSubcategoryId = document.getElementById('categoryOrSubcategorySelect').value;
+    const variableValue = document.getElementById('variableValues').value;
     if (!runType || !levelOrCategoryId) {
         alert('Please select a run type and level/category!');
         return;
@@ -119,7 +157,11 @@ async function fetchLeaderboard() {
     let url;
     if (runType === 'full-game') {
         // Fetch full game leaderboard
-        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&embed=players`;
+        if (variableValue) {
+        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100&var-${categoryOrSubcategoryId}=${variableValue}`;
+        console.log(url)
+        } else 
+            url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/category/${levelOrCategoryId}?top=100`
         if (categoryOrSubcategoryId) {
             url += `&-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
         }
@@ -147,10 +189,12 @@ async function fetchLeaderboard() {
 
 // Helper function to format time from PT55.450S to 0:55.450
 function formatTime(isoDuration) {
-    const seconds = parseFloat(isoDuration.replace('PT', '').replace('S', ''));
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = (seconds % 60).toFixed(3); // Keep 3 decimal places for milliseconds
-    return `${minutes}:${remainingSeconds}`;
+    // const seconds = parseFloat(isoDuration.replace('PT', '').replace('S', ''));
+    // const minutes = Math.floor(seconds / 60);
+    // const remainingSeconds = (seconds % 60).toFixed(3); // Keep 3 decimal places for milliseconds
+    // return `${minutes}:${remainingSeconds}`;
+    const time = (isoDuration.replace('PT', '').replace('S', ' secs').replace('M', ' mins '))
+    return time
 }
 
 // Display the leaderboard
