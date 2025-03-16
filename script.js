@@ -171,10 +171,7 @@ async function fetchLeaderboard() {
             alert('Please select a category for the level!');
             return;
         }
-        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/level/${levelOrCategoryId}/category/${categoryOrSubcategoryId}?top=100&embed=players`;
-        if (variableId && variableValueId) {
-            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
-        }
+        url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/level/${levelOrCategoryId}/${categoryOrSubcategoryId}?top=100&embed=players`;
     }
 
     try {
