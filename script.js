@@ -5,13 +5,7 @@ document.getElementById('gameInput').addEventListener('input', async function ()
     const gameAbbreviation = this.value.trim();
     if (gameAbbreviation.length === 0) {
         // Clear dropdowns if the input is empty
-        document.getElementById('runTypeSelect').innerHTML = `
-            <option value="">Select run type</option>
-            <option value="full-game">Full Game</option>
-            <option value="level">Level</option>
-        `;
-        document.getElementById('levelOrCategorySelect').innerHTML = '<option value="">Select a level or category</option>';
-        document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        clearDropdowns();
         return;
     }
 
@@ -21,13 +15,7 @@ document.getElementById('gameInput').addEventListener('input', async function ()
         gameId = data.data[0].id; // Store the game ID
     } else {
         // Clear dropdowns if no game is found
-        document.getElementById('runTypeSelect').innerHTML = `
-            <option value="">Select run type</option>
-            <option value="full-game">Full Game</option>
-            <option value="level">Level</option>
-        `;
-        document.getElementById('levelOrCategorySelect').innerHTML = '<option value="">Select a level or category</option>';
-        document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        clearDropdowns();
         alert('Game not found!');
     }
 });
@@ -70,8 +58,10 @@ document.getElementById('runTypeSelect').addEventListener('change', async functi
         }
     });
 
-    // Clear the third dropdown when the second dropdown is updated
+    // Clear the third and fourth dropdowns when the second dropdown is updated
     document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
+    document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
 });
 
 // Fetch categories or subcategories based on the selected level or category
@@ -94,6 +84,15 @@ document.getElementById('levelOrCategorySelect').addEventListener('change', asyn
     }
     
     const response = await fetch(url);
+    if (!response.ok) {
+        // Handle 404 or other errors
+        console.error('Error fetching data:', response.statusText);
+        document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+        document.getElementById('variableSelect').innerHTML = '<option value="">No variables available</option>';
+        document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+        return;
+    }
+
     const data = await response.json();
     const categoryOrSubcategorySelect = document.getElementById('categoryOrSubcategorySelect');
     categoryOrSubcategorySelect.innerHTML = '<option value="">Select a category or subcategory</option>';
@@ -139,8 +138,6 @@ document.getElementById('categoryOrSubcategorySelect').addEventListener('change'
         });
             
     };
-
-
 });
 
 // Fetch and display the leaderboard when the "Search" button is clicked
@@ -165,6 +162,9 @@ async function fetchLeaderboard() {
         if (categoryOrSubcategoryId) {
             url += `&-${categoryOrSubcategoryId}=${categoryOrSubcategoryId}`; // Add subcategory filter
         }
+        if (variableId && variableValueId) {
+            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
+        }
     } else if (runType === 'level') {
         // Fetch level leaderboard
         if (!categoryOrSubcategoryId) {
@@ -172,6 +172,9 @@ async function fetchLeaderboard() {
             return;
         }
         url = `https://www.speedrun.com/api/v1/leaderboards/${gameId}/level/${levelOrCategoryId}/category/${categoryOrSubcategoryId}?top=100&embed=players`;
+        if (variableId && variableValueId) {
+            url += `&-${variableId}=${variableValueId}`; // Add variable value filter
+        }
     }
 
     try {
@@ -212,3 +215,21 @@ function displayLeaderboard(runs, runType) {
         leaderboard.appendChild(runDiv);
     });
 }
+
+// Helper function to clear all dropdowns
+function clearDropdowns() {
+    document.getElementById('runTypeSelect').innerHTML = `
+        <option value="">Select run type</option>
+        <option value="full-game">Full Game</option>
+        <option value="level">Level</option>
+    `;
+    document.getElementById('levelOrCategorySelect').innerHTML = '<option value="">Select a level or category</option>';
+    document.getElementById('categoryOrSubcategorySelect').innerHTML = '<option value="">Select a category or subcategory</option>';
+    document.getElementById('variableSelect').innerHTML = '<option value="">Select a variable</option>';
+    document.getElementById('variableValueSelect').innerHTML = '<option value="">Select a variable value</option>';
+}
+
+// Dark mode toggle
+document.getElementById('darkModeToggle').addEventListener('click', function () {
+    document.body.classList.toggle('dark-mode');
+});
